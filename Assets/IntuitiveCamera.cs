@@ -15,7 +15,11 @@ public class IntuitiveCamera : MonoBehaviour {
 
 	int framesOfMovement = 0;
 
-	Vector3 rotation = Vector3.zero;
+	Vector3 _rotation = Vector3.zero;
+
+	void Start() {
+		_rotation = transform.rotation.eulerAngles; 
+	}
 	
 	// Update is called once per frame
 	void FixedUpdate () {
@@ -26,10 +30,10 @@ public class IntuitiveCamera : MonoBehaviour {
 		if (Input.GetMouseButton (1)) {
 			UnityEngine.Cursor.lockState = CursorLockMode.Locked;
 
-			rotation.x -= y;
-			rotation.y += x;
-			rotation.x = Mathf.Clamp (rotation.x, -89, 89);
-			transform.rotation = Quaternion.Euler (rotation);
+			_rotation.x -= y;
+			_rotation.y += x;
+			_rotation.x = Mathf.Clamp (_rotation.x, -89, 89);
+			transform.rotation = Quaternion.Euler (_rotation);
 		} else {
 			UnityEngine.Cursor.lockState = CursorLockMode.None;
 		}
