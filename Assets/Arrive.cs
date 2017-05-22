@@ -2,31 +2,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
+
 public class Arrive : MonoBehaviour {
 
+	public float rotationSpeed = 4f;
+	public float movementSpeed = 2f;
+
 	private Vector3 _target = Vector3.zero;
-	private Rigidbody rigid;
-
-	public float rotationSpeed = 20f;
-	public float movementSpeed = 0.00001f;
-
-	// Use this for initialization
-	void Start () {
-		rigid = GetComponent (typeof(Rigidbody)) as Rigidbody;
-	}
+	private float _expectedTravelTime;
+	private float _currentTravelTime;
 
 	public void setTarget(Vector3 target) {
-		this._target = target;
+		_target = target;
+		_expectedTravelTime = (_target - transform.position).magnitude / movementSpeed;
+		_currentTravelTime = 0f;
 	}
 
 	void FixedUpdate () {
 		if (_target == Vector3.zero)
 			return;
 
-		Debug.Log ((_target - transform.position).magnitude);
+		if (_currentTravelTime > _expectedTravelTime * 1.2) {
+			// We ran into an obstacle. Warp and finish
+			transform.position = _target;
+			_target = Vector3.zero;
+			return;
+		}
+
 		if ((_target - transform.position).magnitude > 0.1)
 			moveTowardsTarget ();
+		else
+			// finish
+			_target = Vector3.zero;
 	}
 
 	void moveTowardsTarget() {
@@ -38,7 +45,9 @@ public class Arrive : MonoBehaviour {
 
 		if (Vector3.Angle (transform.forward, direction) < 10) {
 			// moving
-			transform.position += direction.normalized * movementSpeed;
+			transform.position += direction.normalized * movementSpeed * Time.deltaTime;
+			// we only count moving time to travel time
+			_currentTravelTime += Time.deltaTime;
 		}
 	}
 }
