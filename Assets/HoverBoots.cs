@@ -12,6 +12,13 @@ public class HoverBoots : MonoBehaviour {
 	}
 
 	void Update () {
-		_rigid.useGravity = Physics.Raycast(transform.position + Vector3.up, Vector3.down);
+		
+		if (!Physics.Raycast(transform.position, Vector3.down)) {
+			Debug.Log ("Stop!");
+			_rigid.useGravity = false;
+			_rigid.velocity = Vector3.zero;
+		} else {
+			_rigid.useGravity = true;
+		}
 	}
 }

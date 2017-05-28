@@ -6,20 +6,14 @@ using HoloToolkit.Unity.SpatialMapping;
 using UnityEngine.EventSystems;
 using UnityEngine.VR.WSA.Input;
 
-public class BattleControl : MonoBehaviour {
-
-	public GameObject knight;
-	public GameObject targetMarker;
-
-	Camera cam;
+public class ClickToMove : MonoBehaviour {
 
 	SpatialMappingManager spatialMappingManager;
 	GestureRecognizer gestureRecognizer;
+	Vector3 target = Vector3.zero;
 
 	// Use this for initialization
 	void Start () {
-		cam = Camera.main;
-
 		spatialMappingManager = SpatialMappingManager.Instance;
 		if (spatialMappingManager == null)
 		{
@@ -30,33 +24,22 @@ public class BattleControl : MonoBehaviour {
 		gestureRecognizer.TappedEvent += OnTappedEvent;
 		gestureRecognizer.StartCapturingGestures();
 	}
-
+	
+	// Update is called once per frame
 	void Update () {
+		Vector3 headPosition = Camera.main.transform.position;
+		Vector3 gazeDirection = Camera.main.transform.forward;
 
-		// Target Marker
-		Vector3 target = getTarget ();
-		if (target != Vector3.zero && targetMarker != null) {
-			targetMarker.transform.position = target;
-		}
-
-		if (Input.GetMouseButtonDown (0))
-			OnTap();
-	}
-
-	Vector3 getTarget() {
-		RaycastHit hit;
-		if (Physics.Raycast (cam.transform.position, cam.transform.forward, out hit)) {
-			return hit.point;
+		RaycastHit hitInfo;
+		if (Physics.Raycast (headPosition, gazeDirection, out hitInfo, 30.0f, spatialMappingManager.LayerMask)) {
+			target = hitInfo.point;
 		} else {
-			return Vector3.zero;
+			target = Vector3.zero;
 		}
 	}
 
 	public virtual void OnTappedEvent(InteractionSourceKind source, int tapCount, Ray headRay) {
-		OnTap ();
-	}
-	public void OnTap() {
 		Debug.Log ("Tapped!");
-		knight.GetComponent<Arrive> ().setTarget (getTarget ());
+		GetComponent<Arrive> ().setTarget (target);
 	}
 }

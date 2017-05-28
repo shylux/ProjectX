@@ -13,6 +13,7 @@ public class Arrive : MonoBehaviour {
 	private float _currentTravelTime;
 
 	public void setTarget(Vector3 target) {
+		Debug.Log ("Arrive: target set");
 		_target = target;
 		_expectedTravelTime = (_target - transform.position).magnitude / movementSpeed;
 		_currentTravelTime = 0f;
