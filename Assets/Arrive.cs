@@ -11,22 +11,30 @@ public class Arrive : MonoBehaviour {
 	private Vector3 _target = Vector3.zero;
 	private float _expectedTravelTime;
 	private float _currentTravelTime;
+	private Animation _anim;
+
+	void Start() {
+		_anim = GetComponent<Animation> () as Animation;
+		_anim.wrapMode = WrapMode.Loop;
+	}
 
 	public void setTarget(Vector3 target) {
 		Debug.Log ("Arrive: target set");
 		_target = target;
 		_expectedTravelTime = (_target - transform.position).magnitude / movementSpeed;
 		_currentTravelTime = 0f;
+
+		_anim.CrossFade ("Walk");
 	}
 
 	void FixedUpdate () {
 		if (_target == Vector3.zero)
 			return;
 
-		if (_currentTravelTime > _expectedTravelTime * 1.2) {
+		if (_currentTravelTime > _expectedTravelTime * 1.2 || isUnderOverTarget()) {
 			// We ran into an obstacle. Warp and finish
 			transform.position = _target;
-			_target = Vector3.zero;
+			arrivedAtTarget ();
 			return;
 		}
 
@@ -34,7 +42,12 @@ public class Arrive : MonoBehaviour {
 			moveTowardsTarget ();
 		else
 			// finish
-			_target = Vector3.zero;
+			arrivedAtTarget();
+	}
+
+	void arrivedAtTarget() {
+		_target = Vector3.zero;
+		_anim.CrossFade ("Wait");
 	}
 
 	void moveTowardsTarget() {
@@ -50,5 +63,9 @@ public class Arrive : MonoBehaviour {
 			// we only count moving time to travel time
 			_currentTravelTime += Time.deltaTime;
 		}
+	}
+
+	bool isUnderOverTarget() {
+		return (Vector3.ProjectOnPlane(transform.position, Vector3.up) - Vector3.ProjectOnPlane(_target, Vector3.up)).magnitude < 0.01;
 	}
 }

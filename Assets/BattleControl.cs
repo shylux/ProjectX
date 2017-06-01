@@ -9,7 +9,10 @@ using UnityEngine.VR.WSA.Input;
 public class BattleControl : MonoBehaviour {
 
 	public GameObject knight;
-	public GameObject targetMarker;
+	public GameObject slime;
+	public GameObject coinPrefab;
+
+	public float coinSpawnRadius = 2;
 
 	Camera cam;
 
@@ -32,15 +35,11 @@ public class BattleControl : MonoBehaviour {
 	}
 
 	void Update () {
-
-		// Target Marker
-		Vector3 target = getTarget ();
-		if (target != Vector3.zero && targetMarker != null) {
-			targetMarker.transform.position = target;
-		}
-
 		if (Input.GetMouseButtonDown (0))
 			OnTap();
+	}
+	public virtual void OnTappedEvent(InteractionSourceKind source, int tapCount, Ray headRay) {
+		OnTap ();
 	}
 
 	Vector3 getTarget() {
@@ -52,11 +51,17 @@ public class BattleControl : MonoBehaviour {
 		}
 	}
 
-	public virtual void OnTappedEvent(InteractionSourceKind source, int tapCount, Ray headRay) {
-		OnTap ();
-	}
 	public void OnTap() {
 		Debug.Log ("Tapped!");
-		knight.GetComponent<Arrive> ().setTarget (getTarget ());
+		if (getTarget () != Vector3.zero) {
+			if (GazeManager.Instance.HitObject.tag == "Player") {
+				foreach (GameObject coin in GameObject.FindGameObjectsWithTag ("Coin")) {
+					coin.GetComponent<PlaceRandomly> ().respawn ();
+					slime.transform.rotation *= Quaternion.AngleAxis (180, Vector3.right);
+				}
+			} else {
+				slime.GetComponent<Arrive> ().setTarget (getTarget ());
+			}
+		}
 	}
 }
